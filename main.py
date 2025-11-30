@@ -1,5 +1,6 @@
-from sender.py import sendMsg
-from recevier.py import viewRecieved
+from communicate.py import sendMsg
+from communicate.py import decryptReceived
+from User.py import User
 
 def signInPrompt(primaryUser, otherUser):
   print("Signed in as " + primaryUser)
@@ -12,7 +13,7 @@ def signInPrompt(primaryUser, otherUser):
   elif userAction == 'R':
     decryptReceived(primaryUser) # this program needs to check if there is a message to read in the first place
   
-def main:
+def main():
   Alice = User()
   Bob = User()
   fp = open("Transmitted_Data.txt")
@@ -29,5 +30,3 @@ def main:
   elif userSelection == 'B':
     signInPrompt(Bob, Alice)
 
-    
-  

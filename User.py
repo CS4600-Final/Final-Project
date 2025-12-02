@@ -31,15 +31,18 @@ class User:
       fp.write(data)
     print("Public key stored to: " + self.username + "publickey.pem")
   
-  def encryptMessage(plaintext):
+  def encryptMessage(self, plaintext, receiverPublic):
     ciphertextAES = self._AESEncryption(plaintext)
     ciphertext = self._RSAEncryption(ciphertextAES, receiverPublic)
     return ciphertext
 
-  def decryptMessage(self, ciphertext, privateKey):
-    ciphertextAES = self._RSADecryption(ciphertext, privateKey)
-    plaintext = self._AESDecryption(ciphertextAES[:-32], ciphertextAES[-32:-16], ciphertextAES[-16:] )
-    return plaintext
+  def decryptMessage(self, ciphertext):
+    with open(self.username+"privatekey.pem", "rb") as privateFile:
+      data = privateFile.read()
+      privateKey = RSA.import_key(data, self.password)
+      ciphertextAES = self._RSADecryption(ciphertext, privateKey)
+      plaintext = self._AESDecryption(ciphertextAES[:-32], ciphertextAES[-32:-16], ciphertextAES[-16:] )
+      return plaintext
 
   def signMessage(self, plaintext):
     return signature
@@ -78,22 +81,3 @@ class User:
     plaintext = cipher.decrypt(ciphertext)
 
     return plaintext
-
-#used for testing with no official way of key generation
-test = User()
-key = RSA.generate(3072)
-with open("private.txt", "wb") as privateKeyFile:
-  privateKeyFile.write(key.exportKey('PEM'))
-with open("public.txt", "wb") as publicKeyFile:
-  publicKeyFile.write(key.public_key().exportKey('PEM'))
-
-with open("public.txt", "rb") as public_key_file:
-  publicKey = RSA.importKey(public_key_file.read())
-with open("private.txt", "rb") as private_key_file:
-  privateKey = RSA.importKey(private_key_file.read())
-
-#test._RSAEncryption(b'testing',key)
-#print(test._RSADecryption(test._RSAEncryption(b'testing', publicKey ), privateKey  ) )
-#importantInfo = test._AESEncryption(b"testing")
-#print("\n",importantInfo[:-32],importantInfo[-32:-16], importantInfo[-16:] )
-#print(test._AESDecryption(importantInfo[:-32],importantInfo[-32:-16], importantInfo[-16:]))

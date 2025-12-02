@@ -1,6 +1,6 @@
-from communicate.py import sendMsg
-from communicate.py import decryptReceived
-from User.py import User
+from communicate import sendMsg
+from communicate import decryptReceived
+from User import User
 
 def signInPrompt(primaryUser, otherUser):
   print("Signed in as " + primaryUser)

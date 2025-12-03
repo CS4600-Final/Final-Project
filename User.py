@@ -1,4 +1,7 @@
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import AES
+from Crypto.Cipher import PKCS1_OAEP
+import os
 
 class User:
   # Initialize the user with username and password, and create a key pair.
@@ -28,18 +31,53 @@ class User:
       fp.write(data)
     print("Public key stored to: " + self.username + "publickey.pem")
   
-  def encryptMessage(plaintext):
+  def encryptMessage(self, plaintext, receiverPublic):
+    ciphertextAES = self._AESEncryption(plaintext)
+    ciphertext = self._RSAEncryption(ciphertextAES, receiverPublic)
     return ciphertext
 
-  def decryptMessage(ciphertext):
-    return plaintext
+  def decryptMessage(self, ciphertext):
+    with open(self.username+"privatekey.pem", "rb") as privateFile:
+      data = privateFile.read()
+      privateKey = RSA.import_key(data, self.password)
+      ciphertextAES = self._RSADecryption(ciphertext, privateKey)
+      plaintext = self._AESDecryption(ciphertextAES[:-32], ciphertextAES[-32:-16], ciphertextAES[-16:] )
+      return plaintext
 
-  def signMessage(plaintext):
+  def signMessage(self, plaintext):
     return signature
 
-  def validateMessage(signature, pubKey):
+  def validateMessage(self, signature, pubKey):
     return isValid
+  
+  def _AESEncryption(self, plaintext):
+    #generate AES key and cipher
+    AESKey = os.urandom(16)
+    cipher = AES.new(AESKey, AES.MODE_EAX)
+    AESNonce = cipher.nonce
 
-# Use cases:
-# Run the program as "Alice"
-# Run the program as "Bob"
+    #encrypts and appends needs data for decryption
+    ciphertext = bytearray(cipher.encrypt(plaintext))
+    ciphertext += AESNonce
+    ciphertext += AESKey
+    byteciphertext = bytes(ciphertext)
+
+    return byteciphertext
+  
+  def _AESDecryption(self, ciphertext, encryptedNonce, AESKey):
+    decipher = AES.new(AESKey, AES.MODE_EAX, nonce = encryptedNonce)
+    plaintext = decipher.decrypt(ciphertext)
+
+    return plaintext
+  
+  def _RSAEncryption(self, plaintext, RSAKey):    #
+    cipher = PKCS1_OAEP.new(RSAKey)
+    ciphertext = cipher.encrypt(plaintext)
+
+    return ciphertext
+  
+  def _RSADecryption(self, ciphertext, RSAKey):
+    cipher = PKCS1_OAEP.new(RSAKey)
+    plaintext = cipher.decrypt(ciphertext)
+
+    return plaintext

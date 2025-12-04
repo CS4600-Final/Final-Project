@@ -1,24 +1,39 @@
-from Crypto.Hash import SHA3_256
+from Crypto.Hash import SHA256, HMAC
 
-def genHash(msg):
-    hashObj = SHA3_256.new()
 
-    for data in msg:
-        hashObj.update(msg)
+def genHash(msg, secret):
+    hashObj = HMAC.new(secret, digestmod=SHA256)
 
+    hashObj.update(msg)
+    
     return hashObj.hexdigest()
 
+def verifyHash(msg, hash, secret):
+    hashObj = HMAC.new(secret, digestmod=SHA256)
 
+    hashObj.update(msg)
+    try:
+        hashObj.hexverify(hash)
+        return True
+    except ValueError:
+        return False
+
+secret = 'i_am_secret'
+encodedSecret = secret.encode('utf-8')
 
 print("Testing Hash Output")
-msg1 = b"very long string"
-msg2 = b"very long stringg"
+print("Secret: " + secret)
+msg = b"bobMessage"
 
-hashedMsg1 = genHash(msg1)
-hashedMsg2 = genHash(msg2)
+hashedMsg1 = genHash(msg, encodedSecret)
+editedHash = genHash(msg, encodedSecret)
+
+edit = list(editedHash)
+edit[5] = '0'
+editedHash = "".join(edit)
 
 print("Hash of previous message1: " + hashedMsg1)
-print("Hash of previous message2: " + hashedMsg2)
+print("Edited hash: " + editedHash)
 
-print("Hashes equal? " + (str)(hashedMsg1==hashedMsg2))
-
+print("Verifying original hash with secret: " + str(verifyHash(msg, hashedMsg1, encodedSecret)))
+print("Verifying edited hash: " + str(verifyHash(msg, editedHash, encodedSecret)))

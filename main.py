@@ -1,5 +1,5 @@
 from communicate import sendMsg
-from communicate import decryptReceived
+#from communicate import decryptReceived
 from User import User
 
 def signInPrompt(primaryUser, otherUser):

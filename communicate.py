@@ -1,13 +1,18 @@
-def sendMsg(sender, receiver):
-  file = open("Transmitted_Data.txt", "a")
-  
-  publicKey = file.readline().strip().split()
-  while(publicKey != receiver):
-    publicKey = file.readline().strip().split()
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import AES
+from Crypto.Cipher import PKCS1_OAEP
+from User import User
+import os
 
-  return 
+def sendMsg(sender, receiverName, message):
+  # obtain the ciphertext using the receiver's public key
+  receiverPubKey = getPublicKey(receiverName)
+  ciphertext = sender.encryptMessage(message, receiverPubKey)
+  file = open("Transmitted_Data.txt", "ba")
+  file.write(ciphertext)
+  file.close()
 
-def decryptReceived(receiver):
+def receiveMessages(receiver):
   # assume Transmit file is formatted as Receiver Sender Message or 
   # if public key is written as PK User PublicKey
   file = open("Transmitted_Data.txt", "r")
@@ -25,12 +30,10 @@ def decryptReceived(receiver):
 
   return 0
 
-#decrypts message. if not properly encrypted or in unable to decrypt returns "unable to decrypt"
-def decryptMessage(encryptedMessage):
-  #use private key on encrypted message
+def decryptMessage(receiverName, encMessage, password):
+  host = User(receiverName, password)
+  host.decryptMessage(encMessage)
 
-  #get AES key, if not compatible (sent message is too short) return unable to decrypt
-
-  #AES decryption then return
-
-  return 0
+def getPublicKey(userName):
+  publicKey = RSA.import_key(open(userName+"publickey.pem").read())
+  return publicKey

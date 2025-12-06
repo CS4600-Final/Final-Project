@@ -1,5 +1,19 @@
 from Crypto.Hash import SHA256, HMAC
+import os
 
+#Methods to be exported
+
+#Generate a random 32-bit secret for MAC purposes
+#Returns a string
+def generateSecret():
+    key_bytes = os.urandom(32)
+
+    key_hex = key_bytes.decode("utf-8")
+
+    return key_hex    
+
+#Create a hash from a message and a secret
+#Returns: The hash generated with SHA256
 
 def genHash(msg, secret):
     hashObj = HMAC.new(secret, digestmod=SHA256)
@@ -7,6 +21,9 @@ def genHash(msg, secret):
     hashObj.update(msg)
     
     return hashObj.hexdigest()
+
+#Verify a given hash using a given message and secret
+#Returns: Boolean - True if verified, False if not
 
 def verifyHash(msg, hash, secret):
     hashObj = HMAC.new(secret, digestmod=SHA256)
@@ -17,6 +34,9 @@ def verifyHash(msg, hash, secret):
         return True
     except ValueError:
         return False
+
+
+#Testing functions of methods
 
 secret = 'i_am_secret'
 encodedSecret = secret.encode('utf-8')

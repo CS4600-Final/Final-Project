@@ -4,6 +4,8 @@ from Crypto.Cipher import PKCS1_OAEP
 import os
 
 class User:
+  #
+
   # Initialize the user with username and password, and create a key pair.
   def __init__(self, username, password):
     self.username = username

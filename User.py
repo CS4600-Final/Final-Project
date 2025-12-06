@@ -2,6 +2,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES
 from Crypto.Cipher import PKCS1_OAEP
 import os
+from hmac import generateSecret, genHash, verifyHash
 
 class User:
   # Initialize the user with name and password, and create a key pair.
@@ -88,9 +89,5 @@ class User:
     plaintext = cipher.decrypt(ciphertext)
 
     return plaintext
-  def signMessage(self, plaintext):
-    return signature
-
-  def validateMessage(self, signature, pubKey):
-    return isValid
+  
 

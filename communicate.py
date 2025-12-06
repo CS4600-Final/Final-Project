@@ -3,13 +3,16 @@ from Crypto.Cipher import AES
 from Crypto.Cipher import PKCS1_OAEP
 from User import User
 import os
+from hmac import genHash, verifyHash, generateSecret
+
 
 def sendMsg(sender, receiverName, message):
   # obtain the ciphertext using the receiver's public key
   receiverPubKey = getPublicKey(receiverName)
   ciphertext = sender.encryptMessage(message, receiverPubKey)
+  signedMsg = signMessage(sender, receiverName, ciphertext)
   file = open("Transmitted_Data.txt", "ba")
-  file.write(ciphertext)
+  file.write(signedMsg)
   file.close()
 
 def receiveMessages(receiver):
@@ -26,7 +29,9 @@ def receiveMessages(receiver):
   print("You have received", len(receivedMessages), "messages.")
   for message in receivedMessages:
     input("press enter to read nest message")
-    print(decryptMessage(message[0], message[1:]))
+    target, hmac, rawMsg = message.split(".")
+    print(validateMessage(target, hmac, message))
+    print(decryptMessage(rawMsg[0], rawMsg[1:]))
 
   return 0
 
@@ -37,3 +42,46 @@ def decryptMessage(receiverName, encMessage, password):
 def getPublicKey(userName):
   publicKey = RSA.import_key(open(userName+"publickey.pem").read())
   return publicKey
+
+# Store a shared key between users in a secure, password protected file
+def storeMacKey(host, target, secret):
+  print("Storing the shared key...")
+  with open(host.name + "_" + target + ".key", "wb") as fp:
+    rsaKey = RSA.import_key(open(host.name + "publickey.pem").read())
+    data = host._RSAEncryption(secret, rsaKey)
+    fp.write(data)
+  print("Secret stored to " + host.name + "_" + target + ".key")
+
+#Retrieve a shared key between users from a secure file.
+def retrieveMacKey(host, target):
+  #Need to search for keys
+  #Both user.name+target.name AND target.name+user.name key files
+  #If not found, should create and store a new key
+  print("Retrieving shared key...")
+  if(os.path.isfile(host.name + "_" + target + ".key")):
+    macKey = host.name + "_" + target + ".key"
+  elif(os.path.isfile(target + "_" + host.name + ".key")):
+    macKey = target + "_" + host.name + ".key"
+  else:
+    print("No key found, creating new key...")
+    key = generateSecret()
+    storeMacKey(host.name, target, key)
+    return key
+
+  with open(macKey, "rb") as fp:
+    rsaKey = RSA.import_key(open(host.name + "publickey.pem").read())
+    keyEncrypt = fp.read()
+    data = host._RSADecryption(keyEncrypt, rsaKey) 
+    return data
+    
+def signMessage(host, target, plaintext):
+  secret = retrieveMacKey(host, target)
+  hmac = genHash(plaintext, secret)
+  signedMsg = f"{host.name}.{hmac}.{plaintext}"
+
+  return signedMsg
+
+def validateMessage(target, hmac, message):
+  secret = retrieveMacKey(target)
+  isValid = verifyHash(message, hmac, secret)
+  return isValid

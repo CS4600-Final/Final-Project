@@ -1,6 +1,18 @@
 from Crypto.Hash import SHA256, HMAC
 import os
 
+'''
+    Anticipated flow for validating messages
+
+    1) Handshake - Both users are decided, the sender and transmitter
+    2) Key generation - Sender should generate a key and send it to the transmitter
+        with RSA Encryption. 
+    3) Key saving - Both users should be able to save the key. Store in a file?
+    4) Message HMAC Generation - A message is signed with the key, to be sent with the encrypted message
+    5) Message HMAC Validation - A message is compared with the HMAC using the key to validate
+'''
+
+
 #Methods to be exported
 
 #Generate a random 32-bit secret for MAC purposes
@@ -8,7 +20,7 @@ import os
 def generateSecret():
     key_bytes = os.urandom(32)
 
-    key_hex = key_bytes.decode("utf-8")
+    key_hex = key_bytes.hex()
 
     return key_hex    
 

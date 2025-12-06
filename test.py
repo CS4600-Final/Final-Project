@@ -25,10 +25,24 @@ def main():
     action = ""
     while action != "3":
         action = menuPrompt()
-        if action == 1:
-            # check for new messages
-            pass
-        if action == "2":
+        if action == "1":
+            print("flag")
+            if os.path.isfile("Transmitted_Data.txt"):
+                fp = open("Transmitted_Data.txt", "r")
+                data = fp.read().split(" ",2)
+                recipient = data[0]
+                print(recipient)
+                if recipient == hostName:
+                    print("You have received a messsage!")
+                    print("Decrypting the message using your private key...")
+                    encMsg = data[1]
+                    msg = host.decryptMessage(encMsg)
+                    print("The message said: '" + msg + "'")
+                    # decrypt
+                    os.remove("Transmitted_Data.txt")
+            else:
+                    print("No new messages to read.")
+        elif action == "2":
             receiverName = input("Who would you like to send a message to?")
             receiver_key_path = receiverName + "publickey.pem"
             # The user entered a valid user. Ask them for the message

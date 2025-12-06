@@ -13,7 +13,7 @@ def sendMsg(sender, receiverName, message):
   ciphertext = sender.encryptMessage(message, receiverPubKey)
   signedMsg = signMessage(sender, receiverName, ciphertext)
   file = open("Transmitted_Data.txt", "a")
-  file.write(signedMsg + "\n")
+  file.write(receiverName + " " + ciphertext + " " + signedMsg + "\n")
   file.close()
 
 def receiveMessages(receiver):

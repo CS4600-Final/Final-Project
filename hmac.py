@@ -28,7 +28,7 @@ def generateSecret():
 #Returns: The hash generated with SHA256
 
 def genHash(msg, secret):
-    hashObj = HMAC.new(secret, digestmod=SHA256)
+    hashObj = HMAC.new(secret.encode("utf-8"), digestmod=SHA256)
 
     hashObj.update(msg)
     
@@ -50,6 +50,7 @@ def verifyHash(msg, hash, secret):
 
 #Testing functions of methods
 
+""" 
 secret = 'i_am_secret'
 encodedSecret = secret.encode('utf-8')
 
@@ -69,3 +70,4 @@ print("Edited hash: " + editedHash)
 
 print("Verifying original hash with secret: " + str(verifyHash(msg, hashedMsg1, encodedSecret)))
 print("Verifying edited hash: " + str(verifyHash(msg, editedHash, encodedSecret)))
+ """

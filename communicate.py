@@ -30,6 +30,7 @@ def receiveMessages(receiver):
   for message in receivedMessages:
     input("press enter to read nest message")
     target, hmac, rawMsg = message.split(".")
+    #print("Target: " + target + "\t hmac: " + hmac + "\t rawMsg: " + rawMsg)
     print(validateMessage(target, hmac, message))
     print(decryptMessage(rawMsg[0], rawMsg[1:]))
 
@@ -47,8 +48,8 @@ def getPublicKey(userName):
 def storeMacKey(host, target, secret):
   print("Storing the shared key...")
   with open(host.name + "_" + target + ".key", "wb") as fp:
-    rsaKey = RSA.import_key(open(host.name + "publickey.pem").read())
-    data = host._RSAEncryption(secret, rsaKey)
+    rsaKey = getPublicKey(host.name)
+    data = host._RSAEncryption(secret.encode("utf-8"), rsaKey)
     fp.write(data)
   print("Secret stored to " + host.name + "_" + target + ".key")
 
@@ -65,13 +66,17 @@ def retrieveMacKey(host, target):
   else:
     print("No key found, creating new key...")
     key = generateSecret()
-    storeMacKey(host.name, target, key)
+    storeMacKey(host, target, key)
+    print(key)
     return key
 
+
   with open(macKey, "rb") as fp:
-    rsaKey = RSA.import_key(open(host.name + "publickey.pem").read())
+    rawPrivate = open(host.name + "privatekey.pem", "rb")
+    privateKey = RSA.import_key(rawPrivate.read(), host.password)
+    #publicKey = getPublicKey(host.name)
     keyEncrypt = fp.read()
-    data = host._RSADecryption(keyEncrypt, rsaKey) 
+    data = host._RSADecryption(keyEncrypt, privateKey) 
     return data
     
 def signMessage(host, target, plaintext):

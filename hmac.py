@@ -19,7 +19,6 @@ import os
 def generateSecret():
     key_bytes = os.urandom(32)
 
-
     return key_bytes    
 
 #Create a hash from a message and a secret
@@ -27,6 +26,7 @@ def generateSecret():
 
 def genHash(msg, secret):
     hashObj = HMAC.new(secret, digestmod=SHA256)
+    
 
     hashObj.update(msg)
     
@@ -39,11 +39,17 @@ def verifyHash(msg, hash, secret):
     hashObj = HMAC.new(secret, digestmod=SHA256)
 
     hashObj.update(msg)
-    try:
-        hashObj.verify(hash)
+
+    if hashObj.digest() == hash:
         return True
-    except ValueError:
+    else:
         return False
+
+    # try:
+    #     hashObj.verify(hash)
+    #     return True
+    # except ValueError:
+    #     return False
 
 
 #Testing functions of methods

@@ -12,36 +12,40 @@ class User:
     #if returning user, verifies account
     if(existingUser):
       while ( not self.verifyUser(name, password) ):
-        print("invalid username or password, re-enter username and password")
+        print("\ninvalid username or password, re-enter username and password. If you would like to stop, enter 'STOP'")
         name = input("Username: ")
+        if name == "STOP":
+          raise BadLoginExist("",1)
         password = input("Password: ")
+      
       self.name = name
       self.password = password.encode("utf-8")
-    # 
+    # if new user, creates new user
     else:
-      while ( os.path.isfile("keys/"+name+"privatekey.pem") ):
-        print("username taken, enter different username: ")
+      while ( name != "STOP" and  os.path.isfile("keys/"+name+"privatekey.pem") ):
+        print("\nusername taken, enter different username. If you would like to stop, enter 'STOP'")
         name = input("Username: ")
+      if name == "STOP":
+        raise BadLoginNew("",2)
       self.name = name
       self.password = password.encode("utf-8")
       self.generateKeys()
 
+  #verifies that the user exists and that the correct password was used
   def verifyUser(self, name, password):
-    validPassword = False
     if (not os.path.isfile("keys/"+name+"privatekey.pem") ):
-      print("file not found")
       validPassword = False
     try:
       with open("keys/"+name+"privatekey.pem", "rb") as privateFile:
         data = privateFile.read()
         privateKey = RSA.import_key(data, password)
         validPassword = True
-    except "RSA key format is not supported":
-      print("invalid password")
+    except:
+      validPassword = False
     finally:
       return validPassword
-      
 
+  #generates key pair for user
   def generateKeys(self):
     print("Generating the key pair...")
     keypair = RSA.generate(3072)
@@ -68,13 +72,19 @@ class User:
       fp.write(data)
     print("Public key stored to: " + self.name + "publickey.pem")
 
-  def destroyKeys(self):
+  #destroys all User data from keys folder
+  def destroyUserData(self):
+    
+    print("Destroying all shared secrets")
+    #finds all keys containing username in proper format for file name
+    #then delete them
     print("Destroying the private key...")
-    os.remove(self.name+"privatekey.pem")
+    os.remove("keys/"+self.name+"privatekey.pem")
     print("Done.")
     print("Destroying the public key...")
     os.remove(self.name+"publickey.pem")
     print("Done.")
+
 
   # Encrypt the message using a unique AES key, then further encrypt the ciphertext with the receiver's public key.
   def encryptMessage(self, plaintext, RSAKey):
@@ -124,3 +134,19 @@ class User:
     plaintext = cipher.decrypt(ciphertext)
 
     return plaintext
+  
+class BadLoginExist(Exception):
+  def __init__(self, message, error_code):
+    super().__init__(message)
+    self.error_code = error_code
+
+  def __str__(self):
+    return f"{self.message}   Error Code: {self.error_code}"
+  
+class BadLoginNew(Exception):
+  def __init__(self, message, error_code):
+    super().__init__(message)
+    self.error_code = error_code
+
+  def __str__(self):
+    return f"{self.message}   Error Code: {self.error_code}"

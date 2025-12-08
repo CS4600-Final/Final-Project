@@ -29,7 +29,7 @@ def receiveMessages(receiver: User):
 
   #checks is receiver got any mesages
   if len(receivedMessages) != 0:
-    print("You have", len(receivedMessages), "messages.")
+    print("\nYou have", len(receivedMessages), "messages.")
 
     #verifies each message found then prints it if valid
     for message in receivedMessages:
@@ -40,7 +40,7 @@ def receiveMessages(receiver: User):
         secret = retrieveMacKey(receiver, sender)
         is_Valid = verifyHash(decodeMsg, decodeHMAC, secret)
         if(is_Valid):
-          print(receiver.decryptMessage(decodeMsg))
+          print("Message from " + sender + ": \"" + receiver.decryptMessage(decodeMsg).decode("utf-8") + "\"")
         else:
           print("Message integrity compromised")
       except ValueError:
@@ -48,7 +48,7 @@ def receiveMessages(receiver: User):
       except NoSharedSecret:
         print("No shared secret with", sender)
   else:
-    print("There are no messages for you to read.")
+    print("\nThere are no messages for you to read.")
 
 #gets public key of user that is not the host
 def getPublicKey(userName):
@@ -96,13 +96,11 @@ def messageSignature(host, target, ciphertext):
     print("No key found, creating new key...")
     key = generateSecret()
     storeMacKey(host, target, key)
-    print(key)
     secret = key
 
   ciphertextSign = base64.b64decode(ciphertext.encode("ascii"))
   hmac = genHash(ciphertextSign, secret)
 
-  print(hmac)
   # host_name_b64 = base64.b64encode(host.name.encode('utf-8')).decode('ascii')
   signature = base64.b64encode(hmac).decode('ascii')
   # ciphertext_b64 = base64.b64encode(ciphertext).decode('ascii')

@@ -11,7 +11,7 @@ print(os.path.realpath(sys.executable))
 
 #menu prompt display used by menu
 def menuPrompt():
-    print("--------------MENU--------------")
+    print("\n--------------MENU--------------")
     print("(1) Receive new messages")
     print("(2) Send a message")
     print("(3) Generate new keys")
@@ -21,24 +21,25 @@ def menuPrompt():
     return response
 
 def systemLogin():
-    
     hostName = input("Please enter your name or 'STOP' to stop: ")
-    if hostName != "STOP":
+    while(hostName != "STOP"):
+        newHost = input("Enter 'NEW' to create a new user or any other key to login: ")
         hostPass = input("Please enter your password: ")
-        newHost = input("Enter 'NEW' if brand new user: ")
         try:
             if (newHost == "NEW"):
                 host = User(hostName, hostPass, False)
             else:
                 host = User(hostName, hostPass, True)
-            main(host)
+            actionHandler(host)
         except BadLoginExist:
-            print("\nIf you dont have an account, please enter NEW when prompted")
+            print("\nInvalid username or password. Please enter 'NEW' when prompted or enter the right password.")
+            hostName = input("Please enter your name or 'STOP' to stop: ")
         except BadLoginNew:
-            print("\nIf you do have an account, please do not enter NEW when prompted")
+            print("\nSorry, an account with username " + hostName + " already exists. If you do have an account, please do not enter 'NEW' when prompted")
+            hostName = input("Please enter your name or 'STOP' to stop: ")
     print("Have a good day!")    
     
-def main(host):
+def actionHandler(host):
     action = ""
     while action != "5":
         action = menuPrompt()
@@ -48,7 +49,7 @@ def main(host):
             if os.path.isfile("Transmitted_Data.txt"):
                 receiveMessages(host)
             else:
-                print("No messages to read.")
+                print("\nNo messages to read.")
 
         #sends message to another registered user
         elif action == "2":             
@@ -58,12 +59,12 @@ def main(host):
             # The host entered a nonexistent user or made a typo. Prompt them again.
             while (not os.path.isfile(receiver_key_path)) and receiverName != "STOP":
                 print("The user " + receiverName + " does not exist. Enter 'STOP' to quit to menu ")
-                receiverName = input("Who would you like to send a message to?")
+                receiverName = input("\nWho would you like to send a message to?")
                 receiver_key_path = "keys/" + receiverName + "publickey.pem"
 
             # The user entered a valid user. Ask them for the message
             if os.path.isfile(receiver_key_path):
-                messageContent = input("Please type your message for " + receiverName + " below, then press [ENTER]").encode("utf-8")
+                messageContent = input("Please type your message for " + receiverName + " below, then press [ENTER] ").encode("utf-8")
                 sendMsg(host, receiverName, messageContent)
                 print("Your message has been sent.")
             
@@ -78,15 +79,18 @@ def main(host):
 
         #deletes account
         elif action == "4":
-            print("Deletion of account will make all message to you unreadable, and make it so other users can't sent you any more messages.")
-            print("Any shared secrets you have will also be deleted")
-            print("You will also be immediately logged out of your account")
-            confirmation = input("Enter 'DELETE' if you would like to continue")
+            print("\nDeletion of account will make all messages to you unreadable, \nand make it so other users can't send you any more messages.")
+            print("Any shared secrets you have will also be deleted, \nand you will be immediately logged out of your account.")
+            confirmation = input("Enter 'DELETE' if you would like to continue ")
+            print()
             if confirmation == "DELETE":
                 #deletes all shared secrets
                 host.destroyUserData()
-                action = "5"
-
+                print("Have a good day!")  
+                exit()
+        elif action == '5':
+            print("Have a good day!")  
+            exit()
         #invalid choice selected
         else:
             print("Invalid choice, Enter another choice")

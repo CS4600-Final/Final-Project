@@ -82,8 +82,8 @@ class User:
   # Encrypt the message using a unique AES key, then further encrypt the ciphertext with the receiver's public key.
   def encryptMessage(self, plaintext, RSAKey):
     dataAES = self.AESEncryption(plaintext)
-    encryptedAESKey = self.RSAEncryption(dataAES[1], RSAKey)    
-    ciphertext = base64.b64encode(dataAES[0] + encryptedAESKey + dataAES[2]).decode('ascii')
+    encryptedAESKeyAndNonce = self.RSAEncryption(dataAES[1], RSAKey)    
+    ciphertext = base64.b64encode(dataAES[0] + encryptedAESKeyAndNonce).decode('ascii')
 
     return f"{ciphertext}"
 
@@ -91,8 +91,8 @@ class User:
     with open("keys/"+self.name+"privatekey.pem", "rb") as privateFile:
       data = privateFile.read()
       privateKey = RSA.import_key(data, self.password)
-      AESKey = self.RSADecryption(ciphertext[-400:-16], privateKey)
-      plaintext = self.AESDecryption(ciphertext[:-400],  AESKey,  ciphertext[-16:])
+      AESKeyAndNonce = self.RSADecryption(ciphertext[-384:], privateKey)
+      plaintext = self.AESDecryption(ciphertext[:-384],  AESKeyAndNonce)
       return plaintext
 
   # Encrypt message with a random 16-byte key,
@@ -105,12 +105,13 @@ class User:
 
     #encrypts and appends needs data for decryption
     ciphertext = bytearray(cipher.encrypt(plaintext))
+    AESdata = AESKey + AESNonce
 
-    return ciphertext, AESKey, AESNonce
+    return ciphertext, AESdata
 
   # Decrypt a message that is encrypted using AES
-  def AESDecryption(self, ciphertext, AESKey, encryptedNonce):
-    decipher = AES.new(AESKey, AES.MODE_EAX, nonce = encryptedNonce)
+  def AESDecryption(self, ciphertext, AESKeyAndNonce):
+    decipher = AES.new(AESKeyAndNonce[:-16], AES.MODE_EAX, nonce = AESKeyAndNonce[-16:])
     plaintext = decipher.decrypt(ciphertext)
 
     return plaintext

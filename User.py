@@ -7,26 +7,19 @@ from hmac import generateSecret, genHash, verifyHash
 
 class User:
   # Initialize the user with name, password, and working keypair
-  def __init__(self, name, password, existingUser = True):
-
+  def __init__(self, name, password, makeAccount = True):
+    
     #if returning user, verifies account
-    if(existingUser):
-      while ( not self.verifyUser(name, password) ):
-        print("\ninvalid username or password, re-enter username and password. If you would like to stop, enter 'STOP'")
-        name = input("Username: ")
-        if name == "STOP":
-          raise BadLoginExist("",1)
-        password = input("Password: ")
-      
-      self.name = name
-      self.password = password.encode("utf-8")
+    if(makeAccount):
+      if(not self.verifyUser(name, password)):
+        raise BadLoginExist("",1)
+      else:
+        self.name = name
+        self.password = password.encode("utf-8")
     # if new user, creates new user
-    else:
-      while ( name != "STOP" and  os.path.isfile("keys/"+name+"privatekey.pem") ):
-        print("\nusername taken, enter different username. If you would like to stop, enter 'STOP'")
-        name = input("Username: ")
-      if name == "STOP":
+    elif(os.path.isfile("keys/"+name+"publickey.pem")):\
         raise BadLoginNew("",2)
+    else:
       self.name = name
       self.password = password.encode("utf-8")
       self.generateKeys()
@@ -82,7 +75,7 @@ class User:
     os.remove("keys/"+self.name+"privatekey.pem")
     print("Done.")
     print("Destroying the public key...")
-    os.remove(self.name+"publickey.pem")
+    os.remove("keys/"+self.name+"publickey.pem")
     print("Done.")
 
 

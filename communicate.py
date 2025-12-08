@@ -96,7 +96,6 @@ def messageSignature(host, target, ciphertext):
     print("No key found, creating new key...")
     key = generateSecret()
     storeMacKey(host, target, key)
-    print(key)
     secret = key
 
   ciphertextSign = base64.b64decode(ciphertext.encode("ascii"))

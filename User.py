@@ -40,7 +40,7 @@ class User:
 
   #generates key pair for user
   def generateKeys(self):
-    print("Generating the key pair...")
+    print("\nGenerating the key pair...")
     keypair = RSA.generate(3072)
     self.storePrivateKey(keypair)
     self.storePublicKey(keypair)
@@ -95,7 +95,8 @@ class User:
       plaintext = self.AESDecryption(ciphertext[:-400],  AESKey,  ciphertext[-16:])
       return plaintext
 
-  # Encrypt message with a random 16-byte key, then return the resulting ciphertext with the AES nonce and AES key appended to it.
+  # Encrypt message with a random 16-byte key,
+  # then return the resulting ciphertext with the AES nonce and AES key appended to it.
   def AESEncryption(self, plaintext):
     #generate AES key and cipher
     AESKey = os.urandom(16)

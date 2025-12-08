@@ -11,7 +11,7 @@ print(os.path.realpath(sys.executable))
 
 #menu prompt display used by menu
 def menuPrompt():
-    print("--------------MENU--------------")
+    print("\n--------------MENU--------------")
     print("(1) Receive new messages")
     print("(2) Send a message")
     print("(3) Generate new keys")
@@ -30,7 +30,7 @@ def systemLogin():
                 host = User(hostName, hostPass, False)
             else:
                 host = User(hostName, hostPass, True)
-                actionHandler(host)
+            actionHandler(host)
         except BadLoginExist:
             print("\nInvalid username or password. Please enter 'NEW' when prompted or enter the right password.")
             hostName = input("Please enter your name or 'STOP' to stop: ")
@@ -49,7 +49,7 @@ def actionHandler(host):
             if os.path.isfile("Transmitted_Data.txt"):
                 receiveMessages(host)
             else:
-                print("No messages to read.")
+                print("\nNo messages to read.")
 
         #sends message to another registered user
         elif action == "2":             
@@ -59,7 +59,7 @@ def actionHandler(host):
             # The host entered a nonexistent user or made a typo. Prompt them again.
             while (not os.path.isfile(receiver_key_path)) and receiverName != "STOP":
                 print("The user " + receiverName + " does not exist. Enter 'STOP' to quit to menu ")
-                receiverName = input("Who would you like to send a message to?")
+                receiverName = input("\nWho would you like to send a message to?")
                 receiver_key_path = "keys/" + receiverName + "publickey.pem"
 
             # The user entered a valid user. Ask them for the message
@@ -79,10 +79,10 @@ def actionHandler(host):
 
         #deletes account
         elif action == "4":
-            print("Deletion of account will make all message to you unreadable, and make it so other users can't sent you any more messages.")
-            print("Any shared secrets you have will also be deleted")
-            print("You will also be immediately logged out of your account")
+            print("\nDeletion of account will make all messages to you unreadable, \nand make it so other users can't send you any more messages.")
+            print("Any shared secrets you have will also be deleted, \nand you will be immediately logged out of your account.")
             confirmation = input("Enter 'DELETE' if you would like to continue ")
+            print()
             if confirmation == "DELETE":
                 #deletes all shared secrets
                 host.destroyUserData()
